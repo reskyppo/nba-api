@@ -23,7 +23,7 @@ type Teams struct {
 
 // Func to handle content from home page
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(w, "This is HomePage!")
+	fmt.Fprintf(w, "This is HomePage!")
 	fmt.Println("Endpoint for homepage")
 }
 
