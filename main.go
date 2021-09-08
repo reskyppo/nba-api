@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -27,6 +29,17 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint for homepage")
 }
 
+// Func to handle post request
+func handleNewTeams(w http.ResponseWriter, r *http.Request) {
+	reqBody, _ := ioutil.ReadAll(r.Body)
+
+	var teams Teams
+	json.Unmarshal(reqBody, &teams)
+	db.Create(&teams)
+	fmt.Println("Endpoint for homepage")
+	json.NewEncoder(w).Encode(teams)
+}
+
 // Func to handle request and create router
 func handleRequests() {
 	log.Println("Starting development server at http://127.0.0.1:8008/")
@@ -36,8 +49,10 @@ func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	//endpoint "/" and the content is from func homePage
 	myRouter.HandleFunc("/", homePage)
+	myRouter.HandleFunc("/team/save", handleNewTeams).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8008", myRouter)) //set the port and handler
 }
+
 func main() {
 	// Define DB name, DB username, DB password
 	db, err = gorm.Open("mysql", "root:@tcp(127.0.0.1:3306)/Basketball?charset=utf8&parseTime=True")
