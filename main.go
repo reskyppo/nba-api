@@ -36,8 +36,17 @@ func handleNewTeams(w http.ResponseWriter, r *http.Request) {
 	var teams Teams
 	json.Unmarshal(reqBody, &teams)
 	db.Create(&teams)
-	fmt.Println("Endpoint for homepage")
+	fmt.Println("Endpoint for post a new teams")
 	json.NewEncoder(w).Encode(teams)
+}
+
+// Func to get all Teams data
+func handleTeams(w http.ResponseWriter, r *http.Request) {
+	teams := []Teams{}
+	db.Find(&teams)
+	fmt.Println("Endpoint for get all teams")
+	json.NewEncoder(w).Encode(teams)
+
 }
 
 // Func to handle request and create router
@@ -50,6 +59,7 @@ func handleRequests() {
 	//endpoint "/" and the content is from func homePage
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/team/save", handleNewTeams).Methods("POST")
+	myRouter.HandleFunc("/team", handleTeams)
 	log.Fatal(http.ListenAndServe(":8008", myRouter)) //set the port and handler
 }
 
