@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -46,7 +47,25 @@ func handleTeams(w http.ResponseWriter, r *http.Request) {
 	db.Find(&teams)
 	fmt.Println("Endpoint for get all teams")
 	json.NewEncoder(w).Encode(teams)
+}
 
+// Get teams by id
+
+func getTeamsById(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["id"]
+	teams := []Teams{}
+	db.Find(&teams)
+	for _, teams := range teams {
+		// string to int
+		s, err := strconv.Atoi(key)
+		if err == nil {
+			if teams.Id == s {
+				fmt.Println("Endpoint for teams with id:", key)
+				json.NewEncoder(w).Encode(teams)
+			}
+		}
+	}
 }
 
 // Func to handle request and create router
@@ -60,6 +79,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/team/save", handleNewTeams).Methods("POST")
 	myRouter.HandleFunc("/team", handleTeams)
+	myRouter.HandleFunc("/team/{id}", getTeamsById)
 	log.Fatal(http.ListenAndServe(":8008", myRouter)) //set the port and handler
 }
 
