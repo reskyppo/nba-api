@@ -41,6 +41,21 @@ type Endpoints struct {
 // Func to handle content from home page
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint for homepage")
+	var data = Endpoints{
+		GetAll:    "/team",
+		GetById:   "/team/{id}",
+		SaveTeams: "/team/save",
+	}
+
+	res := Results{Code: http.StatusOK, Data: data, Message: "Created by Reskyppo"}
+	results, err := json.Marshal(res)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(results)
 }
 
 // Func to handle post request
