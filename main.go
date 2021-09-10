@@ -24,9 +24,22 @@ type Teams struct {
 	Division string `json:"division"`
 }
 
+// Struct for Results response API
+type Results struct {
+	Code    int         `json:"code"`
+	Data    interface{} `json:"data"`
+	Message string      `json:"message"`
+}
+
+// Struct for list endpoint Response API
+type Endpoints struct {
+	GetAll    string `json:"get_all"`
+	GetById   string `json:"get_by_id"`
+	SaveTeams string `json:"save_teams"`
+}
+
 // Func to handle content from home page
 func homePage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "This is HomePage!")
 	fmt.Println("Endpoint for homepage")
 }
 
@@ -50,7 +63,6 @@ func handleTeams(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get teams by id
-
 func getTeamsById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["id"]
