@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -82,17 +81,18 @@ func getTeamsById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	key := vars["id"]
 	teams := []Teams{}
-	db.Find(&teams)
-	for _, teams := range teams {
-		// string to int
-		s, err := strconv.Atoi(key)
-		if err == nil {
-			if teams.Id == s {
-				fmt.Println("Endpoint for teams with id:", key)
-				json.NewEncoder(w).Encode(teams)
-			}
-		}
+
+	db.First(&teams, key)
+
+	res := Results{Code: http.StatusOK, Data: teams, Message: "Success get product"}
+	result, err := json.Marshal(res)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(result)
 }
 
 // Func to handle request and create router
