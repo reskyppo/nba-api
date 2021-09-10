@@ -26,7 +26,6 @@ type Teams struct {
 // Struct for Results response API
 type Results struct {
 	Code    int         `json:"code"`
-	Data    interface{} `json:"data"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
 }
@@ -79,21 +78,34 @@ func handleTeams(w http.ResponseWriter, r *http.Request) {
 
 // Get teams by id
 func getTeamsById(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint for get team by id")
+
 	vars := mux.Vars(r)
 	key := vars["id"]
 	teams := []Teams{}
 
-	db.First(&teams, key)
+	// handle error data not found
+	if db.First(&teams, "id = ?", key).RowsAffected != 0 {
+		res := Results{Code: http.StatusOK, Data: teams, Message: "Success get Team data"}
+		result, err := json.Marshal(res)
 
-	res := Results{Code: http.StatusOK, Data: teams, Message: "Success get product"}
-	result, err := json.Marshal(res)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(result)
+	} else {
+		res := Results{Code: http.StatusNotFound, Data: teams, Message: "Id Team not found"}
+		result, err := json.Marshal(res)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write(result)
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(result)
 }
 
 // Func to handle request and create router
