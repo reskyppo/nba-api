@@ -28,6 +28,7 @@ type Results struct {
 	Code    int         `json:"code"`
 	Data    interface{} `json:"data"`
 	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 // Struct for list endpoint Response API
