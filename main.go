@@ -10,43 +10,23 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
+	ty "github.com/reskyppo/nba-api/types"
 )
 
 // init Global Variable
 var db *gorm.DB
 var err error
 
-// Struct for Teams data details
-type Teams struct {
-	Id       int    `json:"id"`
-	Name     string `json:"name"`
-	Division string `json:"division"`
-}
-
-// Struct for Results response API
-type Results struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
-}
-
-// Struct for list endpoint Response API
-type Endpoints struct {
-	GetAll    string `json:"get_all"`
-	GetById   string `json:"get_by_id"`
-	SaveTeams string `json:"save_teams"`
-}
-
 // Func to handle content from home page
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint for homepage")
-	var data = Endpoints{
+	var data = ty.Endpoints{
 		GetAll:    "/team",
 		GetById:   "/team/{id}",
 		SaveTeams: "/team/save",
 	}
 
-	res := Results{Code: http.StatusOK, Data: data, Message: "Created by Reskyppo"}
+	res := ty.Results{Code: http.StatusOK, Data: data, Message: "Created by Reskyppo"}
 	results, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -61,7 +41,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func handleNewTeams(w http.ResponseWriter, r *http.Request) {
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
-	var teams Teams
+	var teams ty.Teams
 	json.Unmarshal(reqBody, &teams)
 	db.Create(&teams)
 	fmt.Println("Endpoint for post a new teams")
@@ -71,9 +51,9 @@ func handleNewTeams(w http.ResponseWriter, r *http.Request) {
 // Func to get all Teams data
 func getAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint for get all teams")
-	teams := []Teams{}
+	teams := []ty.Teams{}
 	db.Find(&teams)
-	res := Results{Code: http.StatusOK, Message: "Sukses get all data", Data: teams}
+	res := ty.Results{Code: http.StatusOK, Message: "Sukses get all data", Data: teams}
 	result, err := json.Marshal(res)
 
 	if err != nil {
@@ -90,11 +70,11 @@ func getTeamsById(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	key := vars["id"]
-	teams := []Teams{}
+	teams := []ty.Teams{}
 
 	// handle error data not found
 	if db.First(&teams, "id = ?", key).RowsAffected != 0 {
-		res := Results{Code: http.StatusOK, Data: teams, Message: "Success get Team data"}
+		res := ty.Results{Code: http.StatusOK, Data: teams, Message: "Success get Team data"}
 		result, err := json.Marshal(res)
 
 		if err != nil {
@@ -104,7 +84,7 @@ func getTeamsById(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(result)
 	} else {
-		res := Results{Code: http.StatusNotFound, Data: teams, Message: "Id Team not found"}
+		res := ty.Results{Code: http.StatusNotFound, Data: teams, Message: "Id Team not found"}
 		result, err := json.Marshal(res)
 
 		if err != nil {
@@ -143,7 +123,7 @@ func main() {
 	}
 
 	// Create Table Teams
-	db.AutoMigrate(&Teams{})
+	db.AutoMigrate(&ty.Teams{})
 
 	//initiate func for request
 	handleRequests()
