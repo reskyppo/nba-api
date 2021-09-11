@@ -69,11 +69,19 @@ func handleNewTeams(w http.ResponseWriter, r *http.Request) {
 }
 
 // Func to get all Teams data
-func handleTeams(w http.ResponseWriter, r *http.Request) {
+func getAll(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint for get all teams")
 	teams := []Teams{}
 	db.Find(&teams)
-	fmt.Println("Endpoint for get all teams")
-	json.NewEncoder(w).Encode(teams)
+	res := Results{Code: http.StatusOK, Message: "Sukses get all data", Data: teams}
+	result, err := json.Marshal(res)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(result)
 }
 
 // Get teams by id
@@ -118,7 +126,7 @@ func handleRequests() {
 	//endpoint "/" and the content is from func homePage
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/team/save", handleNewTeams).Methods("POST")
-	myRouter.HandleFunc("/team", handleTeams)
+	myRouter.HandleFunc("/team", getAll)
 	myRouter.HandleFunc("/team/{id}", getTeamsById)
 	log.Fatal(http.ListenAndServe(":8008", myRouter)) //set the port and handler
 }
