@@ -106,6 +106,47 @@ func getTeamsById(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// func to update db teams
+func updateTeams(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint for update team by id")
+
+	vars := mux.Vars(r)
+	key := vars["id"]
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+
+	var teamsUpdate ty.Teams
+	json.Unmarshal(reqBody, &teamsUpdate)
+
+	var teams ty.Teams
+	// handle error data not found
+	if db.First(&teams, "id = ?", key).RowsAffected != 0 {
+		db.Model(&teams).Updates(teamsUpdate)
+
+		res := ty.Results{Code: http.StatusOK, Data: teams, Message: "Success update teams"}
+		result, err := json.Marshal(res)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(result)
+	} else {
+		data := []ty.Teams{}
+		res := ty.Results{Code: http.StatusNotFound, Data: data, Message: "Id Team not found"}
+		result, err := json.Marshal(res)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write(result)
+	}
+}
+
 // Func to handle request and create router
 func handleRequests() {
 	log.Println("Starting development server at http://127.0.0.1:8008/")
@@ -116,6 +157,7 @@ func handleRequests() {
 	//endpoint "/" and the content is from func homePage
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/team/save", handleNewTeams).Methods("POST")
+	myRouter.HandleFunc("/team/save/{id}", updateTeams).Methods("PUT")
 	myRouter.HandleFunc("/team", getAll)
 	myRouter.HandleFunc("/team/{id}", getTeamsById)
 	log.Fatal(http.ListenAndServe(":8008", myRouter)) //set the port and handler
