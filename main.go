@@ -38,7 +38,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 // Func to handle post request
-func handleNewTeams(w http.ResponseWriter, r *http.Request) {
+func addTeams(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint for post a new teams")
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
@@ -156,7 +156,7 @@ func handleRequests() {
 	myRouter := mux.NewRouter().StrictSlash(true)
 	//endpoint "/" and the content is from func homePage
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/team/save", handleNewTeams).Methods("POST")
+	myRouter.HandleFunc("/team/save", addTeams).Methods("POST")
 	myRouter.HandleFunc("/team/save/{id}", updateTeams).Methods("PUT")
 	myRouter.HandleFunc("/team", getAll)
 	myRouter.HandleFunc("/team/{id}", getTeamsById)
