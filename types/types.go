@@ -16,7 +16,9 @@ type Results struct {
 
 // Struct for list endpoint Response API
 type Endpoints struct {
-	GetAll    string `json:"get_all"`
-	GetById   string `json:"get_by_id"`
-	SaveTeams string `json:"save_teams"`
+	GetAll      string `json:"get_all"`
+	GetById     string `json:"get_by_id"`
+	SaveTeams   string `json:"save_teams"`
+	UpdateTeams string `json:"update_teams"`
+	DeleteTeams string `json:"delete_teams"`
 }

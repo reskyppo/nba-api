@@ -21,9 +21,11 @@ var err error
 func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint for homepage")
 	var data = ty.Endpoints{
-		GetAll:    "/team",
-		GetById:   "/team/{id}",
-		SaveTeams: "/team/save",
+		GetAll:      "/team",
+		GetById:     "/team/{id}",
+		SaveTeams:   "/team/save",
+		UpdateTeams: "/team/save/{id}",
+		DeleteTeams: "/team/delete/{id}",
 	}
 
 	res := ty.Results{Code: http.StatusOK, Data: data, Message: "Created by Reskyppo"}
