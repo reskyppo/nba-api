@@ -147,6 +147,43 @@ func updateTeams(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// func to delete db teams
+func deleteTeams(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint for delete team by id")
+
+	vars := mux.Vars(r)
+	key := vars["id"]
+
+	var teams ty.Teams
+	data := []ty.Teams{} //to make it empty array rather than null
+
+	// handle error data not found
+	if db.First(&teams, "id = ?", key).RowsAffected != 0 {
+		db.Delete(&teams)
+
+		res := ty.Results{Code: http.StatusOK, Data: data, Message: "Success delete team"}
+		result, err := json.Marshal(res)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write(result)
+	} else {
+		res := ty.Results{Code: http.StatusNotFound, Data: data, Message: "Id Team not found"}
+		result, err := json.Marshal(res)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write(result)
+	}
+}
+
 // Func to handle request and create router
 func handleRequests() {
 	log.Println("Starting development server at http://127.0.0.1:8008/")
@@ -158,6 +195,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/team/save", addTeams).Methods("POST")
 	myRouter.HandleFunc("/team/save/{id}", updateTeams).Methods("PUT")
+	myRouter.HandleFunc("/team/delete/{id}", deleteTeams).Methods("DELETE")
 	myRouter.HandleFunc("/team", getAll)
 	myRouter.HandleFunc("/team/{id}", getTeamsById)
 	log.Fatal(http.ListenAndServe(":8008", myRouter)) //set the port and handler
