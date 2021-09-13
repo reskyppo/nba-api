@@ -39,13 +39,23 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 // Func to handle post request
 func handleNewTeams(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint for post a new teams")
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
 	var teams ty.Teams
 	json.Unmarshal(reqBody, &teams)
 	db.Create(&teams)
-	fmt.Println("Endpoint for post a new teams")
-	json.NewEncoder(w).Encode(teams)
+
+	res := ty.Results{Code: http.StatusOK, Data: teams, Message: "Success create new Teams"}
+	result, err := json.Marshal(res)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(result)
 }
 
 // Func to get all Teams data
