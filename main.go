@@ -193,6 +193,17 @@ func handleRequests() {
 
 	// create a router using mux
 	myRouter := mux.NewRouter().StrictSlash(true)
+
+	// handle wrong endpoint
+	myRouter.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+		data := []ty.Results{}
+		res := ty.Results{Code: http.StatusNotFound, Data: data, Message: "Enpoint not found"}
+		response, _ := json.Marshal(res)
+		w.Write(response)
+	})
+
 	//endpoint "/" and the content is from func homePage
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/team/save", addTeams).Methods("POST")
